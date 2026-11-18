@@ -1,153 +1,305 @@
-# Campus Connect - Flask + SQLite Backend
+# Campus Connect – Student Information Portal
 
-Backend for **Campus Connect - Integrated Student Enrollment and Information System**.
-It combines the Laboratory 3 course management API with the Laboratory 4 portal
-data (students, enrollments, announcements) behind one REST API.
+An integrated Student Information System developed using **Python, Flask, SQLite, HTML, CSS, and JavaScript** for the System Integration and Architecture laboratory activities.
 
-The frontend is the separate Campus Connect portal hosted on Base44. This folder
-is the Python backend and is NOT hosted by Base44.
+This project combines:
 
-## 1. Project structure
+- **Laboratory 3A – Student Course Management API**
+- **Laboratory 4 – Campus Connect Student Information Portal**
 
-    Campus-Connect/
-      app.py                  Flask app, database setup, REST API, sample data
-      database.db             created automatically on first run (do not commit)
-      requirements.txt
-      README.md
-      .gitignore
-      run.bat                 one-click setup + run on Windows
-      start.bat               run again after run.bat
-      templates/
-        index.html            dashboard page
-        students.html
-        courses.html
-        enrollment.html
-        announcements.html
-      static/
-        css/style.css
-        javascript/script.js
-        images/
-      screenshots/
+The application provides a simple university portal for managing student records, courses, enrollments, announcements, and dashboard statistics.
 
-## 2. Run it on Windows
+## Technologies Used
 
-1. Install Python 3.10+ from python.org (tick "Add Python to PATH").
-2. Put all files in a folder called Campus-Connect.
-3. Double-click **run.bat**. It creates a virtual environment, installs the
-   requirements and starts the server.
-4. Open http://127.0.0.1:5000/api/health in a browser. You should see JSON with
-   "status": "ok".
-5. The API base URL for the frontend is **http://127.0.0.1:5000/api**.
+| Technology | Purpose |
+| --- | --- |
+| Python | Backend programming language |
+| Flask | Web framework and REST API |
+| SQLite | Database management |
+| HTML | Webpage structure |
+| CSS | Website styling |
+| JavaScript | Frontend functionality |
+| Flask-CORS | Cross-origin API communication |
+| Gunicorn | Production web server |
 
-Manual alternative:
+## Project Structure
 
-    python -m venv .venv
-    .venv\Scripts\activate
-    pip install -r requirements.txt
-    python app.py
+```text
+student-course-api/
+├── app.py
+├── requirements.txt
+├── README.md
+├── templates/
+│   ├── index.html
+│   ├── students.html
+│   ├── courses.html
+│   ├── enrollment.html
+│   └── announcements.html
+└── static/
+    ├── css/
+    │   └── style.css
+    └── javascript/
+        └── script.js
+```
 
-## 3. Database
+## Main Features
 
-database.db is created automatically the first time the app starts, together
-with the five tables (students, courses, enrollments, announcements, users) and
-a small set of fictional sample records. Foreign keys are enforced
-(PRAGMA foreign_keys = ON) and enrollments has a UNIQUE (student_id, course_id)
-constraint so the same student cannot be enrolled twice in the same course.
+### 1. Dashboard
+- Displays total students.
+- Displays total courses.
+- Displays enrollment statistics.
+- Displays available courses.
+- Displays pending and approved enrollments.
+- Displays total announcements.
 
-To reset the data: stop the server, delete database.db, start it again.
+### 2. Student Management
+- View student records.
+- Search for students.
+- Add new students.
+- Update student information.
+- Delete student records.
+- View a student's enrollments.
 
-## 4. REST API
+### 3. Course Management
+- View available courses.
+- Search and filter courses.
+- Add new courses.
+- Update course information.
+- Delete courses.
+- Monitor course capacity and enrollment count.
 
-All responses are JSON. Errors look like {"error": "message"} with a 4xx/5xx status.
+### 4. Enrollment Management
+- View enrollment records.
+- Create new enrollments.
+- Update enrollment status.
+- Delete enrollment records.
+- Manage Pending, Approved, Rejected, and Cancelled statuses.
+
+### 5. Announcement Management
+- View announcements.
+- Add announcements.
+- Update announcements.
+- Delete announcements.
+
+### 6. User Login
+- Provides a demonstration login API.
+- Supports administrator and student demo accounts.
+- Stores password hashes in the database.
+
+## Database
+
+The application uses **SQLite** as its database.
+
+The database is automatically created when the Flask application starts.
+
+The following tables are included:
+
+| Table | Description |
+| --- | --- |
+| students | Stores student information |
+| courses | Stores course information |
+| enrollments | Stores student enrollment records |
+| announcements | Stores university announcements |
+| users | Stores demo user accounts |
+
+Sample data is automatically added when the database is empty.
+
+## API Endpoints
+
+The REST API uses the following endpoints:
+
+### General and Dashboard
 
 | Method | Endpoint | Description |
-| ------ | -------- | ----------- |
-| GET | /api/health | Service and database check |
-| GET | /api/stats | Dashboard totals, status counts, 7-day trend, recent rows |
-| GET | /api/students | List students (?q= search) |
-| POST | /api/students | Create a student |
-| GET | /api/students/id | One student |
-| PUT | /api/students/id | Update a student |
-| DELETE | /api/students/id | Delete a student (409 if enrollments exist) |
-| GET | /api/courses | List courses (?q= search, includes enrolled count) |
-| POST | /api/courses | Create a course |
-| GET | /api/courses/id | One course |
-| PUT | /api/courses/id | Update a course |
-| DELETE | /api/courses/id | Delete a course (409 if enrollments exist) |
-| GET | /api/enrollments | List enrollments (?q=, ?status=, ?student_id=) |
-| POST | /api/enrollments | Enroll a student (409 on duplicate) |
-| GET | /api/enrollments/id | One enrollment |
-| PUT | /api/enrollments/id | Change status (Pending/Approved/Rejected/Cancelled) |
-| DELETE | /api/enrollments/id | Delete an enrollment |
-| GET | /api/announcements | List announcements |
-| POST | /api/announcements | Create an announcement |
-| GET | /api/announcements/id | One announcement |
-| PUT | /api/announcements/id | Update an announcement |
-| DELETE | /api/announcements/id | Delete an announcement |
+| --- | --- | --- |
+| GET | `/api/health` | Checks API and database status |
+| GET | `/api/stats` | Retrieves dashboard statistics |
 
-Example body for POST /api/enrollments:
+### Students
 
-    {"student_id": 1, "course_id": 3}
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/api/students` | Retrieves all students |
+| GET | `/api/students/<id>` | Retrieves one student |
+| POST | `/api/students` | Adds a student |
+| PUT | `/api/students/<id>` | Updates a student |
+| DELETE | `/api/students/<id>` | Deletes a student |
+| GET | `/api/students/<id>/enrollments` | Retrieves a student's enrollments |
 
-student_id and course_id are the numeric primary keys from /api/students and
-/api/courses. The human-readable student number is returned as student_number.
+### Courses
 
-## 5. Push to GitHub
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/api/courses` | Retrieves all courses |
+| GET | `/api/courses/<id>` | Retrieves one course |
+| POST | `/api/courses` | Adds a course |
+| PUT | `/api/courses/<id>` | Updates a course |
+| DELETE | `/api/courses/<id>` | Deletes a course |
 
-    git init
-    git add .
-    git commit -m "Campus Connect Flask backend"
-    git branch -M main
-    git remote add origin https://github.com/YOUR-USERNAME/campus-connect-backend.git
-    git push -u origin main
+### Enrollments
 
-.gitignore already excludes database.db and .venv. This project needs no secrets.
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/api/enrollments` | Retrieves enrollment records |
+| POST | `/api/enrollments` | Creates an enrollment |
+| PUT | `/api/enrollments/<id>` | Updates an enrollment |
+| DELETE | `/api/enrollments/<id>` | Deletes an enrollment |
 
-## 6. Deploy to Render
+### Announcements
 
-1. Push the project to GitHub (step 5).
-2. On Render: New + > Web Service, connect the repository.
-3. Settings:
-   - Environment: Python 3
-   - Build command: pip install -r requirements.txt
-   - Start command: gunicorn app:app
-4. Create the service and wait for the deploy to finish.
-5. Your API base URL becomes https://YOUR-SERVICE.onrender.com/api
-6. Test it: https://YOUR-SERVICE.onrender.com/api/health
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/api/announcements` | Retrieves announcements |
+| GET | `/api/announcements/<id>` | Retrieves one announcement |
+| POST | `/api/announcements` | Adds an announcement |
+| PUT | `/api/announcements/<id>` | Updates an announcement |
+| DELETE | `/api/announcements/<id>` | Deletes an announcement |
 
-### Keeping SQLite data
+### Users and Login
 
-Render's default filesystem is ephemeral: the SQLite file is recreated and the
-sample data is re-seeded after every restart or redeploy. To keep real data, add
-a persistent disk (paid Render plan) mounted at e.g. /var/data and set the
-environment variable DATABASE_PATH=/var/data/database.db.
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/api/users` | Retrieves demo user information |
+| POST | `/api/login` | Checks login credentials |
 
-## 7. Connect the frontend
+## Demo Login Accounts
 
-1. Open the Campus Connect portal.
-2. Go to Settings.
-3. Paste the API base URL (http://127.0.0.1:5000/api locally, or
-   https://YOUR-SERVICE.onrender.com/api on Render) and press Save.
-4. Press Test - you should see "Connected".
+The application includes sample accounts for testing.
 
-### CORS
+| Role | Username | Password |
+| --- | --- | --- |
+| Administrator | `registrar` | `campus123` |
+| Student | `student` | `campus123` |
 
-The backend enables CORS for all origins so the hosted frontend can call it.
-For production, restrict it:
+These are demonstration accounts for classroom use only.
 
-    CORS(app, origins=["https://your-app.base44.app"])
+## Running the Project Locally
 
-## 8. Quick API tests in a browser
+### Requirements
 
-Open these addresses directly (GET requests):
+- Python 3.9 or newer
+- pip
+- A code editor such as Visual Studio Code
 
-- http://127.0.0.1:5000/api/health
-- http://127.0.0.1:5000/api/students
-- http://127.0.0.1:5000/api/courses
-- http://127.0.0.1:5000/api/enrollments
-- http://127.0.0.1:5000/api/announcements
-- http://127.0.0.1:5000/api/stats
+### Step 1: Create a Virtual Environment
 
-POST / PUT / DELETE need Postman, Insomnia or curl, for example:
+```bash
+python -m venv .venv
+```
 
-    curl -X POST http://127.0.0.1:5000/api/students -H "Content-Type: application/json" -d "{\"student_id\":\"2024-0100\",\"first_name\":\"Test\",\"last_name\":\"Student\",\"email\":\"test@campusconnect.edu\",\"program\":\"BS Computer Science\",\"year_level\":1}"
+### Step 2: Activate the Virtual Environment
+
+Windows PowerShell:
+
+```bash
+.venv\Scripts\Activate.ps1
+```
+
+macOS or Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+### Step 3: Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Step 4: Run the Application
+
+```bash
+python app.py
+```
+
+### Step 5: Open the Application
+
+Open your browser and visit:
+
+```text
+http://127.0.0.1:5000
+```
+
+## Testing the API
+
+After starting the application, open these URLs in your browser:
+
+| URL | Expected Result |
+| --- | --- |
+| `http://127.0.0.1:5000/api/health` | API health information |
+| `http://127.0.0.1:5000/api/stats` | Dashboard statistics |
+| `http://127.0.0.1:5000/api/students` | Student records |
+| `http://127.0.0.1:5000/api/courses` | Course records |
+| `http://127.0.0.1:5000/api/enrollments` | Enrollment records |
+| `http://127.0.0.1:5000/api/announcements` | Announcement records |
+
+POST, PUT, and DELETE requests can be tested using an API testing tool such as Postman.
+
+## Deployment to Render
+
+The application can be deployed using GitHub and Render.
+
+### Render Configuration
+
+| Setting | Value |
+| --- | --- |
+| Runtime | Python 3 |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `gunicorn app:app` |
+
+### Deployment Steps
+
+1. Push the project files to the GitHub repository.
+2. Log in to Render.
+3. Select **New → Web Service**.
+4. Connect the GitHub repository.
+5. Select the `lab3-lab4-integration` branch.
+6. Enter the build and start commands listed above.
+7. Click **Deploy Web Service**.
+
+After deployment, open your Render service URL to access Campus Connect.
+
+You can also check the API using:
+
+```text
+https://your-service.onrender.com/api/health
+```
+
+### Important Database Note
+
+The application uses SQLite. On Render, the default filesystem is not persistent across all redeployments and service changes.
+
+To preserve database records, configure a Render persistent disk and set the environment variable:
+
+```text
+CAMPUS_CONNECT_DB=/var/data/database.db
+```
+
+Mount the persistent disk at:
+
+```text
+/var/data
+```
+
+## Project Notes
+
+- This project uses fictional student and university information.
+- SQLite automatically creates the database and sample records when needed.
+- The application combines the course API from Laboratory 3A with the student information portal from Laboratory 4.
+- The project is intended for educational and laboratory demonstration purposes.
+- The demo login is not a complete production authentication system.
+
+## Developers' Learning Objectives
+
+Through this project, students demonstrate their understanding of:
+
+- Backend API development using Flask.
+- Database integration using SQLite.
+- Frontend and backend integration.
+- REST API methods and endpoints.
+- Student and course information management.
+- Application deployment using GitHub and Render.
+
+**Project:** Campus Connect – Student Information Portal  
+**Subject:** System Integration and Architecture
